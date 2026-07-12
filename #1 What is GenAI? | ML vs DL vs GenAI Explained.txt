@@ -1,0 +1,29 @@
+what is GenAi?
+ML and DL is Tarditional AI in this era and GenAi is out Modern AI
+
+what is GenAI?
+it is a technology which generate anything based on the user query.
+it can generate images, text , code, videos,alomost everything.
+
+What is machine learning?
+basic example is out Netflix, when we watch a movie Netflix keep a track of what find of movies we watch ,it keeps a tack of movies with its name , time, year and category of it
+based on that Netflix recommend movies which we can watch, this is Machine Learning.
+
+what is Deep learning?
+the process where phone or your machine is learning the complex pattern is called Deep learning.
+where machine is learning some deep pattern or deep architecture of the images
+
+what are generative AI applications?
+Chatgpt , claude gemini.
+
+the concept behind the working of Chatgpt or any genai is LLM?
+this is a machine which is trainer on huge amount of text data and can only generate text content.
+
+there are three type of models :
+1) LIM large Image Model:   these models can generate images based on the user request.
+example : google nano banana.
+
+2) LVM large Vision Model:  there are the models which can generate images as well as videos based on the user request
+example: google veo model.
+
+3) LAM large Audio Model: these are the models which can generate audio based on the user request.

@@ -1,0 +1,27 @@
+Well to start the project first we need to know the project structure and Api keys,
+well we always keep out keys in .env file and we never push that to our github.
+
+also we can create a vertual environment with python -m venv env
+venv is command and env is the name of the virtual environment folder name.
+
+so to activate that environme we use source env/bin/activate command
+
+we will create a folder called notebooks where we will keep the python notebooks files there also those will be learning notebook(executing code again when learning).
+and when we going to work with entire project we will use app folder to store our project.
+
+
+inside the requirements.txt we will keep out dependencies incase we need to re-install the project or if we are sharing our project to work togther then this helps to steup the project again or on another machine.
+
+
+so we will have different api keys
+1) OPENAI
+2) GOOGLE
+3) ANTHROPIC
+4) GROQ
+5) HUGGINGFACE_API_TOKEN
+
+well GROQ is not an llm model it provide hardware to run different LLM Models, This can be said as they provide LPU like CPU and GPU.
+also GROK is the LLM model.
+
+
+openAI google and ANTHROPIC are paid models so keep those keys secret never let them leak, which may cost you loss of money.

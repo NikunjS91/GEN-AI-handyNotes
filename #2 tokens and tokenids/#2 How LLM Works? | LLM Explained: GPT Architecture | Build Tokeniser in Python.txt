@@ -1,0 +1,58 @@
+What is an LLM?
+
+Large language Model
+
+large : huge ammount of data
+language : text content
+model : Artificaial machine.
+
+how LLM works?
+when we say GPT its actually the working of LLM, meaning Generative pre-trained Transformer
+generative means capabilities to generate.
+so out LLMs are able to generate some new content based on the user input.
+
+on what basis they can generate it?
+all the LLM we have they had been tained with large amount of books ,articles ,websights ,programming language alomost everything possible.
+
+whenever we request LLM based on the trainer data it generate new response and returns.
+
+now last left is Transformer
+this is a special type of neural network architecture which can understand text input to another level and based on that understanding and trained data 
+can generate a new response. this is transformer.
+
+google introduced it year 2017 in a paper "attension is all you need".
+in this paper the concept was introduced called attension mechanism.
+
+this give the LLM the ability to establish the relationship between multiple words in an input
+
+based on the input it suggest us the next word.
+
+so how this work is that when we write a half sentense like,
+i finlly sat down on the --------> Transformer ---> this will have few options of word as suggestion and each will have their own score , bench(0.5),chair(0.10),floor(0.5),beach(0.80)
+which words has the highest score will be the next word.
+
+this is the whole working of our LLM.
+
+
+Tokens and tokenization:
+so our computer doesnot know or understand the words it only inderstand binary
+
+example -> who is PM of India
+these sentense are broken into chunks like "who" "is" "PM" "of" "India"
+there are list of Strings this perticular data is called tokens
+to each number we assign unique number which is called tokenID's 
+
+so how do we assign numbers to these words?
+all these models like claude gemini chatgpt has its own dictionary, they have assigned huge number of text a unique numbers already.
+the final result what we see is not the tokens rather its tokenID's which are list of numbers.
+now this set of numbered list is send to LLM and the LLM takes and in response it generates another set of numbers and returns us, those number is again mapped to the
+dictionary and again we see the tokes which are words which user can see
+this whole process is tokenization, and the word which gets converter to tokens are called tokenizer.
+
+
+context window:
+it is nothing but how many tokens can enter and how many tokens can get out from a LLM.
+basically request and response.
+
+Max Tokens:
+these are the amount of token we can send or reveive based on that we will get charged.

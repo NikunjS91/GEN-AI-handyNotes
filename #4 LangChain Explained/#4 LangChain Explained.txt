@@ -1,0 +1,84 @@
+as we dicussed before there are N numbers of LLM models.
+so how can we integrate these LLM models in out projects.
+this can be done with API's keys, also we have specific libraries for all these companies and their models like suppose OpenAI
+
+
+openAI:
+step 1: get API_key
+step 2: put that api key in a safe space locally, (.env)
+step 3: install open-AI SDK
+step 4: import OpenAI library
+step 5: make a client
+step 6: with client call create method. create method contains Model="GPT-5", and Input="what is todays weather?" and store it in a variable.
+step 7: Print that variable(response.output_text)
+
+gemini:
+step 1: get API_key
+step 2: put that api key in a safe space locally, (.env naming: GEMINI_API_KEY="") 
+step 3: install -q -U google-genai
+step 4: import genai library
+step 5: make a client (client.models.generate_content)
+step 6: with client call client.models.generate_content inside that call Model="", and contents="what is todays weather?" and store it in a variable.
+step 7: Print that variable(response.text)
+
+claude:
+step 1: get API_key
+step 2: put that api key in a safe space locally, (.env naming: ANTHROPIC_API_KEY="")
+step 3: install anthropic
+step 4: import anthropic library
+step 5: make a client (client anthropic.Anthropic())
+step 6: with client call create method. create method contains Model="claude-sonnet-4.5",max_token=1000 and messages=[
+    {
+        "role":"user",
+        "content":"what is the weather today"
+    }
+]
+
+store it in a variable.
+step 7: Print that variable(response.content)
+
+here we use dictionary.
+
+with this we can see that each LLM have different syntax calling and different methods, while working with one LLM ai its fine to we can do that
+but In production we may need multiple ai then we surely we cant do it this way due to different library and their methods as well as coding structure.
+so in this case the solution is landchain, it is an framework to build ai application.
+
+
+langChain is our framework it work with both javascript as well as python but are going to use python in this series.
+this is open-source no paid requiered.
+we have here LangSurf, LangGraph, LangChain, LangSmith.
+1) LangChain this help in building GENAI apps.
+2) LangGraph helps with building agent or multiagent system.
+3) we can say that LangSmith help delpoy an application on cloud or LangSmith server.
+
+
+Models is used to based on the user question generate answer.
+example : Chat models,LLMs,Embedding models.
+
+Tools are used to give model external Capabalities with the help of that it can generate more meaningful response to the user question.
+example: API, databases, webSearch, data access, computation.
+
+Agents help models by giving choices of tools which he can use and make meaningful response, agent have a list of N numbers of tools and he provide access to the model who use it based on the requirement.
+this extablish communication between tools and models.
+orchestration and reasoning can be the purpose. react agent, tools calling agents can be key components
+nondeterministic workflow, decision making are the use cases.
+
+Memory helps models to requirement the context of conversation, meaning if we ask a question models can give answer but when we counter model more information about the previour question then Memory helps the Models
+context perservation.
+conversations , stateful interaction.
+
+Document Processing this can be explained that from any source data can be loaded, also loading the extra data from different documents it can be pdf, website etc.
+CSV file, excel File or it can be any type of database.
+this Capabalities are provided by LangChain no external componentes are needed to be loaded.
+
+while all those data we get pass through Embeddings or vector Embedding (generate embeddings of data) where do we store it?
+we store it in vector databases like chroma db, pinecone,Faiss.
+
+Retrivers helps to get the exact information from most relevant section of the document and pull them up to response generation.
+RAG, knowledge base search, 
+vector retrivers, web retrivers.
+
+
+not we installed the langchain and landchain with openai through out pip install requirement.txt
+now how to useor load env varibles ?
+we have a Library called DOTENV provide support to load environment variables.
