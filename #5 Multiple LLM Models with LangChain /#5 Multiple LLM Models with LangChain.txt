@@ -1,0 +1,33 @@
+So today we will talk about how we can integrate different models using langChain.
+models can we used in two types:
+1) with agents2
+2) standalone.
+
+we are now discussing Standalone.
+we can use it with init_chat_model also there is another way we use it with models specific package.
+
+
+here with langchain we just change the package name but rest of code remains same thats the beauty of the langchain framework.
+
+so currently we are prompting the llm with the string but in genai these are not the good prompts.
+only string cannot be the input or we can say format for the input must be different.
+
+there comes the concept called Prompts.
+prompt has two types 
+1)static Prompts
+2)dynamic Prompts
+
+so now this is same how we use to prompt in string but now we put a list of tuples as input inside the invoke method,
+meaning that now we have a list or in another words we call it array. "[]"
+inside that array we define tuples [(),()]
+along with that there are some strings inside the tuples defining the personas.
+
+what are the personas?
+those are the perspectives form which the llm would think or the llm would start thinking from that defined persona, example if i say that act like a junior developer then it will act like a junior developer and start aproching the question.
+
+[
+    ("system","you are a python developer"),
+    ("user","how to sort the array.")
+]
+
+this explains that system you think it like you are a python developer and process the user querry.
