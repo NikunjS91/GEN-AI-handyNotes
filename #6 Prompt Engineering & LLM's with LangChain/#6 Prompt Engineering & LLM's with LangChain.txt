@@ -1,0 +1,28 @@
+today we will talk through Dynamic prompts or we can say prompts templates, can how to connect them with the help of chain to our llm.
+
+we follow the same approach how we had that invoke method and we passed string init now we had replace that string with a variable names prompts.
+the prompt varibale has the dynamic prompt strategy.
+
+how it looks ? 
+like static this is dynamic so here we have list followed my dictionary inside it, this is the correct format unlike we used in static was tuple inside the list.
+and the first string inside our is "role" followed by ":" and name of the role, content is our second string in our first dictionary the telling him how he is going to work,
+role: who he is? , content is : how he should do the work.
+this is one dictionary with key pair values.
+
+another same we have 
+"role":"system","content":"you are a javascript developer?" 
+"role":"user", content : "difference between map and filter ?"
+
+
+now with the dynamic prompting i can surely see some amazing results,
+but it not practical to keep on making different whole differernt prompt variable again and prompt again with different content its not practical so we use concept Prompt_templates.
+
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+
+these are the two libraries we used to dyanamic value assigning to the input variables and the stroutparser we used it to extract the content section from the reponse generated from the LLM.
+
+and we used chaining which is the beauty of langchain this help to chain the processes or work together sequentailly with nothing but this single operater "|" if goes front left to right each varibale or object is ran one after another 
+and mainly after all work is done the whole final value is stores in one final variable.
+
+and that final variable can be used as invoke and we are ready with the response.
