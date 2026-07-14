@@ -1,0 +1,16 @@
+so now as we ask question to LLm it can answer based on the stored data but he cant record or store the data we give him, so we are not trying to put a memory so the llm can respond through it.
+
+there are multiple possiblilites or way in which we can give memeory to the LLM.
+today we will discuss one of it.
+
+
+so we had the client of llm and we created a variable like before with role and content,(user, my name is Nikunj Shetye.)
+and we passed this as argument and send request to the LLM. then we responded it likewise hello Nikunj and so forth.
+lets think we added this response inside the Prompt varibale like we appended it then it may respond we the what next question it was like 
+"what is my name ? "
+it will surely generate the answer your name is nikunj.
+but this is not the ideal way to give memeory.
+
+
+we need to implement which is automated.
+
