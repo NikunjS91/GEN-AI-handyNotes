@@ -1,0 +1,35 @@
+Today we are building a qna chat bot using python , langchain , google gemini model and steamlit.
+streamlit give us the ability to generate web application with python.
+
+this help to create genAi based applications.
+it had pre-buileded chatwidgets, Ui components,ai icon , messgaes or progress bar is available in this library.
+
+
+so just add steamlit in requiments.txt then do import the streamlit in code and add alice as you prefer just to not write whole streamlit keyword.
+and in my case i used st as alice for streamlit so there we used title method of streamlit added the app name as title and st.markdown , markdown method to add description about out app.
+
+this is an web app so we cant run it likely python.
+we have a different way to run this app.
+
+to run the streamlit app go to that file directory in your terminal and then run (streamlit run File_name.py) and hit enter.
+
+
+in my case it wasnt working i need to figure out that why but maybe thats because i am using virtual enviroment and the streamlit app is running on my root
+so i ran this command python -m streamlit run File_name.py
+and it worked
+
+so with the st.title and st.markdown i can see the one title like on screen and another is the description line on out front end
+but to see the chat textbox from where we can talk to the llm or we can say from where we can get querry input is st.chat_input("type anything here")
+
+then now we are going to write how the query is passed to llm along with with that it is rendered on the front end
+so we use st.chat_message("role":"user").markdown("content":query)
+
+this statement tells the system with role who typed this and how to differenciate the query is it returned by AI or the user typed so role and content is important.
+then we did the same after we got the response from llm, stored in varibale called res.
+then we code it same as above but role and content is different.
+
+st.chat_message("role":"ai").markdown("content":res.content)
+
+chat_message is nothing but the chat view on front end with .markdown shows the text we want to render, and role and content is the data which show and create difference between ai message and user message.
+
+now we had the scene that we cant see the old messages like if questioned another query then firt query is lost.
