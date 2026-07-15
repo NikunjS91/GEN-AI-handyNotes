@@ -1,0 +1,38 @@
+today we will discuss about the structured output in LLM.
+generally the llm response is in the form of string, let suppose we need the output to be in specific structured form. 
+it can we class object or maybe dictionary form or maybe json or anything else.
+
+can we implement the structure output with langchain?
+yes this can be done in langchain.
+yes for that we need to use the pydentic library and inside that import BaseModel from it.
+
+and create a class by name of your choice we called it ResponseStructure because this class tells the llm to genereate the response in this structure.
+
+so lets talk about the class how we going to define structure inside it
+define the class with BaseModel as the argument inside the class.
+then variables and follow by colon ":" and specify the datatype
+for example:
+
+name:str. --> this means that the llm return me names in this variable form and the datatype should be string.
+
+to explain the llm in which field to put what data we need field class from the pydentic library.
+so till now the we told the llm the structure of the response like how it should be returned but we didnt told him what variable will hold what value form the prompt.
+so now we added the filed here to populate the correct values in the structure.(field validation)
+
+so 
+name:str = field(description="Complete name")
+age:int =Field(description="age")
+
+this defines this class should always return the object only.
+
+
+now we need to tell llm what follow this class structure so we use a function of langchain
+structured_result = llm.with_structure_output(class_name)
+
+res.name returns name value object
+
+to get dictionary output then
+res.model_dump() dont forget the brackets.
+
+
+this will convert response object to response dictionary.
