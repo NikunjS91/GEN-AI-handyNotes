@@ -1,0 +1,7 @@
+till now we used all models which was paid models so now i will introduce you to a free models it can also be used free locally also it can also be used free on cloud.
+the models name is ollama.
+these models are free because it uses the local model, meaning the model with lesser size based on the ram capabalities, can be downloaded locally.
+can we connect those local models to our langchain and make them work?
+
+so nothing everthing is exactly same just we need to install langchain-ollama package and then chat-ollama same choose a model and then make llm client and use it to invoke but the local model need to be downloaded.
+ thats it.
