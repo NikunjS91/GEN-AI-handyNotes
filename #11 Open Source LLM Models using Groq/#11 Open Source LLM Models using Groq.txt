@@ -1,0 +1,19 @@
+today we will start introducing groq and how to work with groq.
+
+Groq is an hardware company which designed a custom LPU which stands for Language processing unit.
+this is specially designed to run LLM models.
+when we use the LLm using the groq platfrom the LLm tend to perform pretty must faster.
+
+let see how can we connect to it with Langchain framework.
+
+we are still working on chat models.
+so we will be using chatgroq from Langchain.
+
+
+in my experiment the graq api key is not working for no reason, it shows connection error.
+but thats fine something must be wrong from the LLM side.
+but the objective is that the normal models perform much more slower compared to the groq and the response time of the groq is just unbelivealble.
+
+
+it works same lanchain-gorq install this package then import the chatgroq package then make object and call a model of choice i tried many groq/compound-mini this was one of them.
+them same follow the llm.invoke and querry and see how fast the response is generated.
