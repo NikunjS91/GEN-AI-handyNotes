@@ -1,0 +1,23 @@
+Today we will learn how can we steam response like ChatGpt in realtime.
+
+
+so to explin streaming it is pretty easy, we used invoke method before so the response was fully generated then stored to the variable and then it was printed on screen.
+response wsa comming in whole structure at once on the screen.
+if you have observed the chatgpt the generation on reponse can also be seen on screen happining live time.
+each word or sentense must be building live time.
+
+to have the same we have streaming method.
+to enable that when you define model put and comma and type Streaming= True.
+
+and below that instead of using the invoke command use stream command.
+
+but then the catch is that you response variable will be a generator, meaning once the response is generated the generator is emptied.
+your response is not long available to print.
+so to see the response we use chucks inside the generator and print the chunks using for loop
+
+think generator a faster memory.
+and chunk is like the each word coming as response in a memory in real time  from LLM which is in cloud to our local machine.
+and we are printing that word or sentenses live-time.
+
+
+refer the code for better understanding.
