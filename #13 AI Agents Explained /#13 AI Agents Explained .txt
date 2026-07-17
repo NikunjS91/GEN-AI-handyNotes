@@ -1,0 +1,27 @@
+today on wards we will start with out Ai-development,
+what are ai agents? what is the difference between ai agents and normal LLM? and how to create our own ai agents?
+
+lets think that llm can he find data from specific database?
+answer is NO, even the answer for can is access api or can he do the google search for you,for all these the answer is no, he can only generate text based on the data we is trained.
+he can take action.
+
+like wise we want out llm to book a flight ticket if we asked him to do so, and should respond you flights tickets are booked with details.
+
+but this can actually be done with the help of the tools,
+
+So tools are nothing but our python functions.
+
+
+so now we gave llm tools like db_access, weather_tool and Google_search
+now we told llm to check the weather of new york.
+it will think about do i have the answer is yes return it,
+if we dont then call tools, we have three tools then wil db_access get me the answer? NO then next.
+will weather_tool give me the answer answer is yes, then i till pass the arguments to that function tool then that tool will generate response and send it back to the llm then the llm will generate response and present to the user.
+
+
+llm follows this Think - action - observe approach
+1) think first he will think that based on the query do i need to do anything if yes then what?
+2) action : in this the llm will take action based on the thinking like tool calling get a response from the tool.
+3) observe : based on the respond from tool do the response is good to send if not then again re-run this approach of think-action-observe.
+
+reaAct : reasioning + action.
