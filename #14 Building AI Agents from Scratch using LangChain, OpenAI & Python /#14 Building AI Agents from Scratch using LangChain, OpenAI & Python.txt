@@ -1,0 +1,31 @@
+Today we will start to build ai agents.
+
+so we already know that llm + prompt + tool is agent,
+till now we know the llm and prompt.
+now lets see the tool how to define tool in python.
+
+so we have to import a library lanchain_code.tools import tool
+
+once we have tool then write a basic addition function how we write it normally.
+
+def addition_tool(a : int,b:int):
+return a + b
+
+only thing here is reamaining to make it as tool is by adding @tool just above the function.
+and another is inside the fucntion in  """ tell the llm what this function does example this will return sum of two numbers. and also we need to define args like telling the llm a: Number one and b: Number two. """
+
+basically we are feeding the llm with an example.
+
+and later we use function_name with .invoke as pass the two aguemeant value with dictionary. incase of one argument then we will have one list or dictionary we can also use string, we use dictionary for multiple argememts as key value pair.
+addition_tool.invoke({"a":2, "b":12})
+
+
+so later we will define same lanchain_openai make its client and same:
+but we are also going bridge the llm and tools with lanchain.agent import Create_agent
+
+then we will have a agent variable = Create_agent(this will define model which llm model are we using , define tools what all tools are we connecting to llm, and thir is system prompt telling the llm who he is.in this case he is math teacher and he use tools for calculation.)
+
+then same response varibale with agent.invoke({"message":[{"role":"user","content":"what is 2 + 3 ?"}]})
+
+in the above invoke with agent the there is main dictionary with a list containing dictionary earler we had only list with dictionary now we have a dictionary with list inside but the messages is requiered in this agent invoke call.
+
