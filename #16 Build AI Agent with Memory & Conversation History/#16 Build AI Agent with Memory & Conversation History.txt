@@ -1,0 +1,11 @@
+as we had last session about the google web scraping tool which we gave to llm and then he was using it to generate answers.
+
+
+to have a temperory memory we can use langgraph which provoides a module called checkpoint inside there is memory,
+we have to import InMemorySaver means its basiclly a memeory which is out own system memory which will be used.
+
+after that do all import for agents and import create_agent.
+
+when defining agent we have to add checkpointer = InMemorySaver() with tools model and system_prompt.
+
+while invoking with agent we have to add one more dictionary after messages key, key name must be "configuable" : {"thread_id": "1"}
