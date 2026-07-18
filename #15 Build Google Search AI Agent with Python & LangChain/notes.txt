@@ -1,0 +1,26 @@
+till now the llm we are using can only answer to those question based on the the data he is trained with.
+but lately there might be some data available publicly why does it use that and generate a response and give it to user.
+
+today we will use google search api and get that publicly available data and give response to the user basically an agent.
+
+so setup an serper account and get a api key.
+then install the package using pip called langchain-community
+
+put your api key in place and use dotenv package and import the load_dotenv package.
+
+and once thats done.
+from langchain_community_utilities import GoogleSerperAPIWrapper
+then make object of that GoogleSerperAPIWrapper.
+
+once this is done nothing else import packages for agentcreation which is langchain.agents import create_agent
+and you choice of llm.
+then same make object of llm and pass model init.
+
+then use the agent varibale and create_agent(model= ,tools=search.run , system_prompt=  ) search.run the search is a object variable of the GoogleSerperAPIWrapper. and system_prompt is telling the system whos he is.
+
+
+then define an variable with your question init.
+and invoke it with agent.
+
+same rest follow meaning while invoke use the messages as key and pass a list of dictionary init.
+
