@@ -50,8 +50,8 @@ if query:
 
         for chunk in response:
             message = message + chunk[0].content        #based on the message comming from response it will be appended to message varibale.
-        space.write(message)                            #writing in that space over front end.
-        
+            space.write(message)                            #writing in that space over front end.
+        st.session_state.history.append({"role":"ai","content":message})
     #ans = response["messages"][-1].content
     #st.chat_message("ai").markdown(ans)
-    st.session_state.history.append({"role":"ai","content":message})
+    

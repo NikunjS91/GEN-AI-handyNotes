@@ -9,3 +9,6 @@ after that do all import for agents and import create_agent.
 when defining agent we have to add checkpointer = InMemorySaver() with tools model and system_prompt.
 
 while invoking with agent we have to add one more dictionary after messages key, key name must be "configuable" : {"thread_id": "1"}
+
+this is basically a temperory memory with thread_id as a name where the content is remembered calling the thread_id will return that session.
+must be the agent does the tool call and once it get the response it must be storing it in the memeory with thread_id and then genereating the response to the user.
