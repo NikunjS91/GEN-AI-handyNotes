@@ -1,0 +1,24 @@
+today we will learn how we going to laod the data from different sources with langchain this is first module of RAG application.
+
+for further referance you can go and visit langchain integration section which has document loader section you can read that.
+
+
+so we installed a packega called pypdf then we created a python notebook,
+then we imported (from langchain_community.document_loaders import TextLoader)
+
+then we make a varible loader and passed the object TextLoader init and inside brakets we passed the path where our file is located.
+then we created another variable named text inside we ran loader.load()
+now if we print the text variable we see the list and in that list we can see the metadata which contain the source of file and the content.
+
+
+from langchain_community.document_loaders import TextLoader
+
+from langchain_community.document_loaders import PyPDFLoader
+
+from langchain_community.document_loaders import CSVLoader
+
+from langchain_community.document_loaders import WebBaseLoader
+
+from langchain_community.document_loaders import WikipediaLoader
+
+these are the different type of loader which return you content from external source there are few more like telegram, whatapp, youtube, github and more just refer langchain docs.
