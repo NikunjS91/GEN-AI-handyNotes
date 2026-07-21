@@ -1,0 +1,36 @@
+today we will learn about the RAG which is one of the most important topic,
+what is this RAG? Why RAG based application are important?
+and how this systems are different compared to llm based generative systems?
+
+
+we will study how this system works, what is RAG pipiline and how to build it and how it works.
+and why RAG based system have such big value?
+
+
+the RAG in llm is a technique that enhances LLM by connecting to external knowledge bases, allowing them to retrive relevant, up-to-date info before generating answers, making responses more acurate,factual and domain-specific
+like giving an LLM an "open book" for answers instead of just relying on its internal training data.
+
+
+now lets think we have a pdf from which we are preparing for exam, 
+generally we will think like lets upload the whole pdf to llm and he will generate responses, but the fact is the llm will not be also to take whole pdf because it has a context window, 
+simple example 1000 page of book it is, it can take 200 in its context, what about the rest 800 what will be lost,,
+for for this problem We have RAG.
+
+retrival argumented generation(RAG)
+
+
+RAG pipeline:
+now think the same 1000 page book, i will tell you how will it be processed in pipeline:
+step 1: Document /data loading : (loading the 1000 pages pdf)
+step 2: split the docs in Chunks : (spliting each page as seperate pdf)
+step 3: vector Embedding : (per page we have data so it will be converted to numbers which a computer can understand)
+step 4: Vector DB : (those numbers are stored in vector database)
+
+this is 1 time process.
+
+now the user send a question then based on the similar data in vector_db which matches with question is querried, this term is called similarity search.
+what ever the vector db return we will store it in a variable as it contain the similar data.
+
+now comes the LLM we pass the prompt which is Question + Similar data.
+then the LLM will generate answer and return to User. thats it this is RAG pipeline.
+
