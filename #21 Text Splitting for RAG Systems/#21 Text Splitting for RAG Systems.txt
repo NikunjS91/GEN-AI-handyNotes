@@ -1,0 +1,25 @@
+as we already discussed before while discussing the rag that first phase is to load document which we did before
+not this is second phase where we split document.
+
+today we will implement that text-splitter.
+
+install langchain-text-splitters package
+
+
+from langchain_community.document_loaders import PyPDFLoader,TextLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+use this modules to load the document and process it to split.
+to laod use document_loaders
+and to split use langchain_text_splitters
+
+make object of both in loader you have to spcify the loader if pdf then make object of pypdf and pass the file uri same goes with text.
+
+RecursiveCharacterTextSplitter object is make like this but we also have to pass two arguments.
+chunk_size =20, chunk_overlap=10.
+
+then use loader.load() to load content in a variable and pass it to a variubale which is associated with splitter.
+then use splitter.split_documents(text) for txt file in case pdf then use this splitter.split_documents(pdf).
+note splitter above is my RecursiveCharacterTextSplitter object.
+
+and you can save it in variable and print the variable to see how it worked.
