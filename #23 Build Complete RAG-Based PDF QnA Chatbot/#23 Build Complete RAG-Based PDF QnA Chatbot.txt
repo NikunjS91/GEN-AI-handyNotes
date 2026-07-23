@@ -1,0 +1,4 @@
+today we will build complete RAG based document based QNA chatbot,
+the model will answer based on the data provided by us not the pre-trained data.
+
+
