@@ -1,0 +1,53 @@
+today we are going to learn how to convert the chunk data which we can get from text splitter before that we use document loader.
+
+what are vector embeddings? why it is important?and how we can convert our own data into vector embeddings?
+after that we are also going to convert out personal data into vector_embeddings? how we can store vector embeddings into vector databases?
+
+we convert the words,sentences , image or audio into a high-dimentional space, where similar items are clustered together.
+basically convert the words into numbers reason being LLM dont understand words,and we keep them close so we can build similarity between realted words.
+
+
+three words let be anuj, rahul, priya we assigned them tokens which are nothing but our numbers
+let suppost these numbres hold sequence of numbers like 122,123,124
+having number close to each other in sequence doesnt make any similarity
+but if we see the height age or coding skills, commincation skills, intelligence,sport with this it is possible to build the similarity with this data.
+which this data we can generate vectors,
+generating these vectors for text is called vector embeddings.
+
+
+what is cosin similarity?
+this is nothing but the graphical respentation of data , like a graph meaning the angle between the any two person based on the similarity as close it will be the angle will be small so this is called cosign similarity
+
+now as we have llm models to convet text to text, like wise we have embedding models to convert text to embeddings.
+embedding models convert text into fix length of vector space
+
+openaiEmbeddings class of langchain.
+
+like wise open ai llm api.  we also have have several embedding models, we are using openai embedding models.
+there comes the length of vector embeddings.
+we are using text-embedding-3-large of open-ai
+
+now with the object of opaiembeddings we have to convert list of string into vector embeddings.
+
+vecotr = embeddings.embed_documents(pass list of strings variable here)
+till now we just generated the vector embeddings now we need to see how to store them in vector databases.
+
+vectors are multi-dimentional data,
+in sql we match exact data,
+but here we dont,
+can be a possibility what we are finding doesnot exist in database, but we have to find similarity meaning nearest data.
+thats why are need vectorDB, this offers similarity search, angles,similarity score.
+
+
+till now we are in indexing phase, 
+
+document -> embedding_models -> generate vector_embeddings -> store those vectors.
+
+we can store it in_memory as well with the help of langchain
+but we can also see external vectorDB
+
+
+now we will use chroma as vectordb externally.
+install langchain-chroma package
+
+import 
