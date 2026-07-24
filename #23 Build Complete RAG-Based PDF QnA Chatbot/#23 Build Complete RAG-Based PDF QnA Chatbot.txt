@@ -2,3 +2,15 @@ today we will build complete RAG based document based QNA chatbot,
 the model will answer based on the data provided by us not the pre-trained data.
 
 
+this goes simple,
+as we know we import env with the package known dotenv.
+
+then we need document loader to load the sprcific document.
+then splitter is needed to slip the document into chunks,
+we also need embdding model i used open ai,
+then we need Chroma as a vector database. and pass this embedding and spliteed text into it.
+once thats done we need to create a templet , so use langchain templet.
+define the templet telling him the he is a ai that can answer question based on the document provided followed by the argument he need question which is gonna be query and context,
+he context can be gathered from the vector similarity_search which comes form Chroma just it take argument which is nothing but the query =query.
+it return a list so we need to page the page_content from that list and iterate it and store it in another varible with a \n. new line 
+then nothing just make a chain of all this and invoke it with a llm, he will answer all question.
