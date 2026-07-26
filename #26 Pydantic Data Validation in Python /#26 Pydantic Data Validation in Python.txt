@@ -1,0 +1,10 @@
+today we will discuss about the libraray called pydentic this allows us to validate data in python.
+in python data validation is not implemented by default.
+in other programming languages when we declare a varibale and declare value inside that and we specify the datatype always, where in python we can create a varible age and save a string inside it.
+or a integer.
+
+
+install pydentic library.
+
+data validation is like, variable inside a class is defined and put a datatype as we want the datatype to be fixed, we call it data validation.
+where the datatype cant be changed, not the value type be change once define string so it will store string.
