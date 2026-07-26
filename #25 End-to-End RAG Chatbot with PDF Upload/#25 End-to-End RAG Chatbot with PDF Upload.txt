@@ -1,1 +1,31 @@
 today we are going to build complete QNA chatbot which will answers any question based on the document provided to it. With UI.
+this follow the same thing 
+loader to load the docuemnt then we have splitter
+then we create embedding with it and use vector db to store it,
+now we have to get agent and add library here.
+and tool library too,
+then we define a tool function which telling him what is this tool and what it does,
+the we add two argument which is context and query, and return the context this tool use similarity search with vectorydb object, and with page_context we get the content and we store it in context.
+
+now for agent we need system_prompt | tool | llm
+llm and tool is easy and done only system_prompt and we are good with agent and also add memrory with langgraph.
+
+
+once this is done then check the working, if done then backbone is done just few minute changes are there and streamlit is pending for front end and also we need to upload files and Ui this all is done in steamlit.
+we store docuemnt_upload , agent, the docuemnt and vector_db in st.session_state
+
+and we play logic from there.
+rest evething you know already.
+only this upload file logic is something you need to understand
+
+###upload document
+if not st.session_state.document_uploaded:
+    uploader = st.file_uploader(label="Please Upload PDF File",type=["pdf"],accept_multiple_files=True). ## UI Upload 
+    if uploader:
+         with st.spinner("Uploading Please wait"):          # loading spinner again UI
+            path = "./Uploaded_PDF_Files/"                  # telling the path varible to point towards a location.
+            for file in uploader:                               #uploder has files so based on the file name and path it getvalues inside the file with that detail the tool generate the content and generate the response.
+                with open(path + file.name,"wb") as f:
+                    f.write(file.getvalue())
+            process_document(path)                              #function call with arguemnt.
+            st.rerun()
