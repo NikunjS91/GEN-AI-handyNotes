@@ -1,0 +1,46 @@
+Today we will start with langgraph journey,
+till now we have developed lot of application with the help of langchain but now we are heading ahead with langgraph.
+this helps use to develop multi-ai-agent system.
+
+
+how langchain work?
+user gives question and out llm does the work and returns a response.
+we made it further advance with tools the llm uses the tools and then generate the response. this is calle the agent
+
+now lets think of we want a complex system lets suppose we have a e-commerce support agent.
+we ask him to track order with order id given in prompt , same we asked for refund for specific order with id given, maybe user asked the agent hows you?
+so for this kinds work is this old work flow is suitable to work with?
+answer is no, because llm dont have permission to perform multiple tasks.
+
+now the user question. ---> requirement ---> 1)track order 2)refund 3)others
+the requirement will decide what task must be performed.
+
+if we see the structure we see it follow graph like structure, this can be done with langgraph.
+langchain is chaining the task one after another, while langgraph means that connecting language models in graph not chain.
+working process is not linear it can be non-linear.
+
+
+Node- node is our pythons functions(def)
+
+now or requirement node has the permission based on the task where he need to jump on, this type of notes are called conditional nodes.
+connection between notes is called edges(arrows)
+
+lets suppose incase of track order, it will be then check for valid order-id or not.
+if not-valid then it will return Give me correct order_id.
+if the order_id is correct then another node is follow fetch the order details,-->> show order_details to user(another node)
+then end.
+
+same follows the refund case, now if validated not we have node to check refund_policy
+this check weather refund is allowed or not.
+likewise based on that it will give response to the user.
+
+likely based on this our system will work based on node by node.
+
+
+this has single-agent, multi-agent ,supevisor-agent.
+
+
+before all this we have a important thing called state,
+with what ever is happining in the system we have as state which keep the track what is happining in the system.
+to maintain the state we use pydantic library.
+
