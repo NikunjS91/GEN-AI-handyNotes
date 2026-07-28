@@ -1,0 +1,4 @@
+today we will build a qna chat bot using langgraph
+based on the user question a complete graph will be followed, from user question to generating answer,
+question and response of it, in the form of memeory we are going to store it, for generating a relative answers.
+
