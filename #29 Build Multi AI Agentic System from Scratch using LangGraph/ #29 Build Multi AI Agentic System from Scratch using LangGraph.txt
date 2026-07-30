@@ -1,3 +1,32 @@
 today we will be developing a multi-agent system from scratch using langgraph,
 in last session we build a qna both with the help of langgraph and lanchain using the nodes.
 today we will not work on single node we will work with muliple node based the question requirement,we will call different node, and based on different nodes,we will generate the final answer.
+
+
+first we got all the libraries imported follow are those.
+from langchain_groq import ChatGroq. this is for LLM
+from langgraph.graph import StateGraph,START,END this is to create nodes and lines graph
+from pydantic import BaseModel,Field        this is to connect the class with all the nodes basically defining the schema.
+from typing import Literal      this is to category which means we want out llm shoild only pick the category which we have given to him to Literal is list["all different categories"]
+
+from langchain_community.utilities import GoogleSerperAPIWrapper this is used to make agent search on internet for information.
+from langchain.agents import create_agent   creata an agent
+from langchain.tools import tool    to creata a custom tool.
+
+first create schema user will give question so store question, then llm will pick the category so thats it is,
+then llm will return answer based on the agent and tool call.
+
+make agent with model tools and system prompt,
+for both weather and google_search.
+
+then start making nodes, they are basically a function with argument of a state class.
+here is all the involing logic working.
+and return the state.
+
+then new have one conditional node called as route,
+based on the contition and return category the next following node will be executed.
+
+then we creata node of coding, google_search and weather.
+link the nodes and we are ready to invoke with graph.
+
+streucture then output and we are done.,
