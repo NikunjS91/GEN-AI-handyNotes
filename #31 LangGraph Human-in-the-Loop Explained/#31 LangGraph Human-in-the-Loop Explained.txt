@@ -1,0 +1,4 @@
+today we are going to buid a system where with each agent decision human feedback is needed.
+we think of writing an email so with this we going to make agent write email content then we may review it once done we going to ask him to send email.
+
+this is nothing but llm running an autonomus task the llm agent will hold for a while get a review on his work and then proceed further.
