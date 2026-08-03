@@ -2,3 +2,9 @@ today we are going to buid a system where with each agent decision human feedbac
 we think of writing an email so with this we going to make agent write email content then we may review it once done we going to ask him to send email.
 
 this is nothing but llm running an autonomus task the llm agent will hold for a while get a review on his work and then proceed further.
+
+
+this follows the same approach of defining the schema and then making nodes and then linking them with node,and follows the logic but then comes the Command which act as a middle phase which wait for user review and then again it generates the response if user
+wants it then, else done.
+this comes from this from langgraph.types import interrupt,Command,
+and while invoking it we just add the the command and then the list tuple of dictionary and list inside and then memory config.
