@@ -1,0 +1,7 @@
+today we will build multi-agent blog generator with human in the loop with out langgraph.
+lets build graph 
+
+basically in this project we going to have 3 main parts,
+for blog witing we need to reaseach so a researcher, another would be writer, meaning based on the research the writer will write content. then comes the final blog this is re-writing blog based on the improvement,
+all these three has the hitl(human in the loop).
+
