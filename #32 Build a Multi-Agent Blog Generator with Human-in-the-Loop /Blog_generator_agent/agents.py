@@ -1,6 +1,6 @@
 import os
 from langchain_groq import ChatGroq
-from langchain_core import ChatPromptTemplet
+from langchain_core.prompts import ChatPromptTemplate
 
 #### Get LLm
 
@@ -11,7 +11,7 @@ def get_llm(model_name : str ="openai/gpt-oss-20b",temperature: float =0.5):
 
 ### research agent
 
-RESEARCH_PROMPT =ChatPromptTemplet.from_messages([
+RESEARCH_PROMPT =ChatPromptTemplate.from_messages([
     {"role":"system","content":"""
      "You are a Research Agent. Given a blog topic and target audience, produce a clear, "
         "structured research outline. Include: \n"
@@ -41,7 +41,7 @@ def research_agent(llm:ChatGroq,topic:str,audiance:str,feedback:str="") -> str:
 
 #writer agent
 
-WRITER_PROMPT =ChatPromptTemplet.from_messages([
+WRITER_PROMPT =ChatPromptTemplate.from_messages([
     {"role":"system","content":"""
      "You are a Blog Writer Agent. Using the research notes provided, write a complete, "
         "engaging blog post. \n"
@@ -80,7 +80,7 @@ def writer_agent(llm:ChatGroq,topic:str,audiance:str,research :str="",feedback:s
 ### Editior agent
 
 
-EDITOR_PROMPT =ChatPromptTemplet.from_messages([
+EDITOR_PROMPT =ChatPromptTemplate.from_messages([
     {"role":"system","content":"""
      "You are an Editor Agent - the final quality gate before publishing.\n"
         "Take the draft and produce the FINAL polished version. Specifically: \n"|

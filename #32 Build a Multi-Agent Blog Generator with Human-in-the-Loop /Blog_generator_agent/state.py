@@ -18,4 +18,4 @@ class BlogState(BaseModel):
     
 
     # Metadata
-    revision_count = int =0
+    revision_count : int =0
