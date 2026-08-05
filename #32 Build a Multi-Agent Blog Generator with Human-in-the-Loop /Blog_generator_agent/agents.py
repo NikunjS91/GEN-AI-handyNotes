@@ -64,9 +64,11 @@ WRITER_PROMPT =ChatPromptTemplate.from_messages([
 def writer_agent(llm:ChatGroq,topic:str,audiance:str,research :str="",feedback:str="") -> str:
     revision_hints=f"human provided this feedback on your previous draft and asked for these changes :{feedback},please apply these changes during writing the blog."
     if not feedback:
-        revision_hints = "thi is your first attempt."
+        revision_hints = "this is your first attempt."
 
     chain = WRITER_PROMPT | llm
+
+    print(revision_hints)
 
     result = chain.invoke({
         "topic": topic,
