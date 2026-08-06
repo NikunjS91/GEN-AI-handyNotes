@@ -1,7 +1,44 @@
 today we will build multi-agent blog generator with human in the loop with out langgraph.
-lets build graph 
+lets build graph
 
 basically in this project we going to have 3 main parts,
 for blog witing we need to reaseach so a researcher, another would be writer, meaning based on the research the writer will write content. then comes the final blog this is re-writing blog based on the improvement,
 all these three has the hitl(human in the loop).
 
+we split the whole project into 4 files instead of writing everything in one notebook, state.py, agents.py, graph.py and the Blog_notebook.ipynb to run and test it.
+
+first state.py, this holds the schema for the whole graph as a pydantic BaseModel called BlogState.
+topic and audiance is the user input,
+research and research_feedback is the researcher output and the human feedback on it,
+draft and draft_feedback is the writer output and feedback on it,
+final_blog is the editor output,
+and revision_count to track how many times we relooped.
+
+then agents.py, this is where the 3 agents live.
+get_llm() just returns a ChatGroq llm, we are using groq for this project not openai.
+research_agent takes the topic, audiance and feedback(if any) and asks the llm to give a research outline, 5-7 key points, facts and a hook, not the full blog yet.
+writer_agent takes the research notes and feedback and writes the full blog with intro, 3-5 sections and conclusion in markdown.
+editor_agent takes the draft and polishes it, fixes grammar, tightens sentences and makes it sound human written not ai.
+every agent is basically a ChatPromptTemplate piped to the llm, chain = PROMPT | llm, then chain.invoke() and we return result.content.
+
+then graph.py, this is where we connect everything with langgraph.
+research_node calls research_agent and saves output to state.research.
+human_review_research_node is the hitl part, it calls interrupt() with the research and instructions, this pauses the graph and waits for us to either approve or send feedback back.
+same pattern for writer, writer_node calls writer_agent, then human_review_draft_node interrupts again for review of the draft.
+editor_node runs last and calls editor_agent to produce the final_blog, no review after this one since its the final polish.
+
+after the review nodes we need conditional edges to decide where to go next,
+route_after_research_review checks if research_feedback is filled, if yes go back to research node to redo it, else move to writer.
+route_after_draft_review does the same thing but for the draft stage, checks draft_feedback and revision_count against MAX_REVISION, if feedback exists go back to writer else go to edit.
+
+then build_blog_graph() wires it all up, adds all 5 nodes, adds the edges and conditional edges, and compiles with an InMemorySaver() as checkpointer, this is needed because interrupt/resume needs a checkpointer to remember where it paused.
+
+in the notebook, we load env, import BlogState and the agents, build the llm, build the graph and draw it with mermaid to see the flow visually.
+
+to run it we need a config with a thread_id, config = {"configurable": {"thread_id": "1"}}, this id is what the checkpointer uses to remember this particular run so we can pause and resume it.
+then graph.invoke({"topic":..., "audiance":...}, config=config) kicks off the run, it goes through research node then hits the first interrupt and pauses waiting on human review.
+we check where it paused with graph.get_state(config), it shows the interrupt payload with the research and instructions.
+to continue after review we invoke again but this time with Command(resume=...) instead of the initial input, passing either "approve" or feedback text, this resumes exactly from where it paused.
+same thing happens again at the draft review interrupt, resume with approve or feedback and it either loops back to writer or moves on to edit and finishes with final_blog.
+
+so the whole flow is research -> review -> (loop or) writer -> review -> (loop or) edit -> end, with a human checkpoint after research and after the draft, before it ever reaches the final published blog.
