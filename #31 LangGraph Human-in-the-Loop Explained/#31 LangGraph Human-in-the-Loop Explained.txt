@@ -115,3 +115,23 @@ notes / tips:
 - prompts in `DraftEmailNode` are simplistic; you can make them more structured (system/instructions) to get better rewrites.
 
 if you want, i can also: show the exact prompt text used for rewrite, improve the human prompt message, or generate a version of the graph that logs each state to a file.
+
+examples — quick walkthroughs
+- example 1: simple medical leave
+	- query: "i want to send email for medical leave to my hr, dates will be 10th august to 15th august 2026, create a simple mail"
+	- flow: graph.invoke(...) generates `draft` → human sees draft via `interrupt`
+	- action: human replies with `Command(resume="yes")` to approve
+	- result: finalizeNode runs, prints "email send Successfully" and `final_response` becomes "Email sent Successfully"
+
+- example 2: change dates and tone
+	- initial query: "request medical leave for 10th-15th august"
+	- after draft, human replies with: `Command(resume="i want to change dates, new dates are 7 july to 21 july, and remove placeholders; just say thank you")`
+	- flow: HumanFeedbackNode stores feedback, condition_route sends flow back to `draft`, DraftEmailNode rewrites using feedback, new `draft` returned
+
+- example 3: iterative edits then approval
+	- start: long/placeholder-heavy draft produced
+	- human replies with rewrite notes (e.g., shorten, remove placeholders)
+	- agent rewrites once or more until human replies `yes`
+	- final: approval triggers `final` node and sets `final_response`
+
+these examples show how `interrupt` + `Command(resume=...)` provide a simple way to simulate human-in-the-loop edits programmatically. use persistent checkpointers for real multi-session runs.
