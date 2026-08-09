@@ -1,3 +1,60 @@
 today we will build complete rag pipeline using langgraph.
 
+code references in RagWithGraph.ipynb
+
+1. environment setup
+	- from dotenv import load_dotenv
+	- load_dotenv()
+	- notebook cell: #VSC-5c599fad, lines 10-11
+
+2. imports and dependencies
+	- PyPDFLoader
+	- RecursiveCharacterTextSplitter
+	- OpenAIEmbeddings
+	- InMemoryVectorStore
+	- ChatGroq
+	- StateGraph, START, END
+	- BaseModel, Field
+	- notebook cell: #VSC-59ce7908, lines 21-28
+
+3. llm initialization
+	- llm = ChatGroq(model="openai/gpt-oss-20b")
+	- notebook cell: #VSC-7223030a, line 38
+
+4. document loading, chunking, and vector store creation
+	- loader = PyPDFLoader("Submission.pdf")
+	- loaded_document = loader.load()
+	- splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+	- splitted_text = splitter.split_documents(loaded_document)
+	- embed = OpenAIEmbeddings(model="text-embedding-3-large")
+	- vector_store = InMemoryVectorStore.from_documents(...)
+	- notebook cell: #VSC-b3b1bc0f, lines 48-59
+
+5. rag state schema
+	- class Ragstate(BaseModel)
+	- question, document, context, answer fields
+	- notebook cell: #VSC-1cac2a8a, lines 69-75
+
+6. graph nodes
+	- retrieve_node: similarity search on the vector store
+	- create_context: joins retrieved page content into a single context string
+	- generate_node: sends question + context to the llm
+	- notebook cell: #VSC-6ec1d38c, lines 85-107
+
+7. langgraph wiring
+	- graph = StateGraph(Ragstate)
+	- add retrieve_node, create_context, generate_node
+	- connect START -> retrieve_node -> create_context -> generate_node -> END
+	- graph.compile()
+	- notebook cell: #VSC-ff88c654, lines 117-129
+
+8. graph visualization
+	- Image(graph.get_graph().draw_mermaid_png())
+	- notebook cell: #VSC-3ea63a84, lines 139-140
+
+9. invocation and output
+	- res = graph.invoke({"question": "what is inngest?"})
+	- res["answer"]
+	- notebook cells: #VSC-2e5a3444, line 150 and #VSC-6310381e, line 160
+
 
