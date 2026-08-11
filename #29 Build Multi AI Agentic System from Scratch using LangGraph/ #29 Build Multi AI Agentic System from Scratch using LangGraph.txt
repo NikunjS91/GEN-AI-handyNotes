@@ -30,3 +30,70 @@ then we creata node of coding, google_search and weather.
 link the nodes and we are ready to invoke with graph.
 
 streucture then output and we are done.,
+
+
+--- detailed walkthrough of what is happening in MultiAgent_LangGraph.ipynb ---
+
+step 1 - environment and imports
+we load the .env file using load_dotenv() so all our api keys like GROQ_API_KEY and SERPER_API_KEY are available as environment variables.
+
+step 2 - define the state schema using pydantic
+we create two pydantic models.
+
+FlowState is the main state that flows through the entire graph. it has three fields:
+- question : the user's input question (string)
+- category : Literal["google_search","weather","coding"] — this restricts the value to only these three options, default is "google_search"
+- answer : the final answer string, default is empty
+
+QuestionCategory is a small helper model used only for structured output. it just has the category field. we use this so the llm returns a clean structured response when classifying the question.
+
+step 3 - initialize the llm
+we use ChatGroq with model llama-3.3-70b-versatile. this is the main brain used across all nodes and agents.
+
+step 4 - create the google search agent
+we use GoogleSerperAPIWrapper which connects to the serper.dev google search api.
+we pass search.run as a tool and create an agent using create_agent() with a system prompt telling it to search google for answers.
+
+step 5 - create the weather agent
+we define a custom tool using the @tool decorator. the function get_weather takes a city name and returns a hardcoded temperature string like "the current temperature in {city} is 23.3C". in a real app this would call a weather api.
+then we create a weather_agent using create_agent() with this custom tool and a matching system prompt.
+
+step 6 - define the nodes (functions)
+
+check_question_category node:
+this is the first node that runs after START. it takes the state, uses llm.with_structured_output(QuestionCategory) to force the llm to return only a structured category field, invokes it with the user question, and updates state.category with the result. this is how we route the question to the right agent.
+
+route function:
+this is the conditional routing function. it simply reads state.category and returns it as a string — either "google_search", "weather", or "coding". langgraph uses this return value to decide which node to call next.
+
+coding_node:
+directly invokes the llm with a system prompt saying it is a coding expert. it asks for a definition, code, and example in the response. stores the result in state.answer.
+
+weather_node:
+invokes weather_agent with the user question formatted as a messages list. extracts the answer from res["messages"][-2].content — the second to last message because the last one is usually the tool call result, not the readable answer.
+
+google_search_node:
+same pattern as weather_node but uses google_agent. invokes with messages and extracts the answer from res["messages"][-2].content.
+
+step 7 - build the graph
+we create a StateGraph(FlowState) and add all four nodes: check_question_category, coding, weather, google_search.
+then we wire up the edges:
+- START → check_question_category (always starts here)
+- check_question_category → conditional edge using route function (goes to coding, weather, or google_search based on category)
+- coding → END
+- google_search → END
+- weather → END
+
+then we compile the graph with graph.compile().
+
+step 8 - visualize
+we use Image(graph.get_graph().draw_mermaid_png()) to render a diagram of the graph showing all nodes and edges visually.
+
+step 9 - invoke and test
+we call graph.invoke({"question":"whats the temperataure in mumbai?"}) and it goes through the full pipeline:
+1. check_question_category classifies it as "weather"
+2. route returns "weather"
+3. weather_node calls weather_agent which uses the get_weather tool
+4. the answer "the current temperature in Mumbai is 23.3C" is returned
+
+so the whole system takes a plain user question, automatically classifies it, picks the right specialized agent, and returns the answer. no manual routing needed — the llm decides the path.
