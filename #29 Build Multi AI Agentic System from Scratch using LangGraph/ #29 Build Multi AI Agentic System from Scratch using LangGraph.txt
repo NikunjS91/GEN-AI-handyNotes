@@ -34,66 +34,105 @@ streucture then output and we are done.,
 
 --- detailed walkthrough of what is happening in MultiAgent_LangGraph.ipynb ---
 
-step 1 - environment and imports
-we load the .env file using load_dotenv() so all our api keys like GROQ_API_KEY and SERPER_API_KEY are available as environment variables.
+the big idea:
+the user asks one question. the system automatically figures out what kind of question it is — is it about weather? coding? or something to search on google? based on that it sends the question to the right specialized agent and returns the answer. no hardcoded if-else logic, the llm itself decides the routing.
 
-step 2 - define the state schema using pydantic
-we create two pydantic models.
 
-FlowState is the main state that flows through the entire graph. it has three fields:
-- question : the user's input question (string)
-- category : Literal["google_search","weather","coding"] — this restricts the value to only these three options, default is "google_search"
-- answer : the final answer string, default is empty
+step 1 - load environment variables
+load_dotenv() reads the .env file and loads api keys into the environment. we need at least two keys here — GROQ_API_KEY to use the groq llm and SERPER_API_KEY to use the google search tool. without these the agents will fail when trying to call external apis.
 
-QuestionCategory is a small helper model used only for structured output. it just has the category field. we use this so the llm returns a clean structured response when classifying the question.
+
+step 2 - define the two pydantic models (state and helper)
+
+we have two separate pydantic models here and it is important to understand why we need both.
+
+FlowState — this is the shared state object that gets passed through every node in the graph. think of it like a baton in a relay race. every node reads from it and writes back to it. it has three fields:
+  - question: whatever the user typed, stored here at the start and never changed.
+  - category: one of "google_search", "weather", or "coding". this starts as a default but gets updated by the first node after the llm classifies the question. using Literal here means pydantic will only accept these exact three strings, nothing else — so the routing logic can never break from an unexpected value.
+  - answer: starts empty, gets filled in by whichever agent node handles the question. this is what we print at the end.
+
+QuestionCategory — this is a tiny helper model with just the category field. we use this only when asking the llm to classify the question. the reason we have a separate model for this is llm.with_structured_output() needs a pydantic model to know exactly what shape of response to force the llm to return. we do not want the full FlowState here — just the category decision. so we give the llm the smallest possible model and it returns a clean {"category": "weather"} style response with no extra text.
+
 
 step 3 - initialize the llm
-we use ChatGroq with model llama-3.3-70b-versatile. this is the main brain used across all nodes and agents.
+llm = ChatGroq(model="llama-3.3-70b-versatile")
+this is the single llm instance used everywhere in the notebook — for classifying questions, for the coding node, and as the brain inside both agents. groq runs llama models extremely fast which is why we use it here.
+
 
 step 4 - create the google search agent
-we use GoogleSerperAPIWrapper which connects to the serper.dev google search api.
-we pass search.run as a tool and create an agent using create_agent() with a system prompt telling it to search google for answers.
+search = GoogleSerperAPIWrapper() connects to the serper.dev api which is basically a google search wrapper. serper.dev returns real google search results as json so the agent can read and summarize them.
 
-step 5 - create the weather agent
-we define a custom tool using the @tool decorator. the function get_weather takes a city name and returns a hardcoded temperature string like "the current temperature in {city} is 23.3C". in a real app this would call a weather api.
-then we create a weather_agent using create_agent() with this custom tool and a matching system prompt.
+we wrap search.run as a tool and pass it to create_agent(). create_agent() builds a react-style agent internally — meaning the agent will think about the question, decide to call the search tool, get the results, then formulate a final answer. the system prompt tells it its job is to search google for answers.
 
-step 6 - define the nodes (functions)
+
+step 5 - create the weather agent using a custom tool
+instead of calling a real weather api, we define a fake tool using the @tool decorator:
+
+@tool
+def get_weather(city: str):
+    return f"the current temperature in {city} is 23.3C"
+
+the @tool decorator is important — it tells langchain to treat this function as a callable tool that an agent can decide to use. the docstring "it provides real time weather details for any city" is not just a comment — langchain reads the docstring to understand what the tool does and when to use it. in production you would replace the return value with an actual weather api call but the pattern stays exactly the same.
+
+then we pass get_weather into create_agent() and the weather_agent is ready. the agent will receive the user question, decide to call get_weather with the city name it extracts, and return the temperature.
+
+
+step 6 - define all the node functions
+
+every node in a langgraph graph is just a python function that takes state as input and returns state as output. that is the entire rule.
 
 check_question_category node:
-this is the first node that runs after START. it takes the state, uses llm.with_structured_output(QuestionCategory) to force the llm to return only a structured category field, invokes it with the user question, and updates state.category with the result. this is how we route the question to the right agent.
+this is the gateway node — the first one that runs. it takes the user question from state, asks the llm to classify it using structured output, and writes the category back to state. this is the key decision point. the code is:
+  st_llm = llm.with_structured_output(QuestionCategory)
+  res = st_llm.invoke(f"i want to know the category of my question: {state.question}. if not sure default to google_search")
+  state.category = res.category
+with_structured_output forces the llm to respond in the shape of QuestionCategory instead of plain text. so res.category is guaranteed to be one of the three valid strings.
 
 route function:
-this is the conditional routing function. it simply reads state.category and returns it as a string — either "google_search", "weather", or "coding". langgraph uses this return value to decide which node to call next.
+this is not a node — it is a routing function used with add_conditional_edges(). it receives state and simply returns state.category as a string. langgraph looks at that returned string and finds the matching node name to call next. so returning "weather" sends execution to the weather node, returning "coding" sends it to the coding node, and so on. it is the traffic controller of the graph.
 
 coding_node:
-directly invokes the llm with a system prompt saying it is a coding expert. it asks for a definition, code, and example in the response. stores the result in state.answer.
+for coding questions we do not need an agent with tools — the llm already knows how to write code. so we just call llm.invoke() directly with a prompt that tells it to respond as a coding expert with a definition, actual code, and a usage example. the result goes into state.answer.
 
 weather_node:
-invokes weather_agent with the user question formatted as a messages list. extracts the answer from res["messages"][-2].content — the second to last message because the last one is usually the tool call result, not the readable answer.
+we invoke weather_agent with the question wrapped in the messages format that langchain agents expect:
+  res = weather_agent.invoke({"messages": [{"role": "user", "content": state.question}]})
+after the agent runs, res["messages"] contains the full conversation history of the agent — the user message, tool call, tool response, and final answer. we pick res["messages"][-2].content which is the second to last message. the reason we skip the last message is that the last entry in messages is usually the raw tool output (like the temperature string). the second to last is the agent's final human-readable response after processing the tool result.
 
 google_search_node:
-same pattern as weather_node but uses google_agent. invokes with messages and extracts the answer from res["messages"][-2].content.
+exact same pattern as weather_node but uses google_agent. invoke with messages, extract answer from messages[-2].content.
 
-step 7 - build the graph
-we create a StateGraph(FlowState) and add all four nodes: check_question_category, coding, weather, google_search.
-then we wire up the edges:
-- START → check_question_category (always starts here)
-- check_question_category → conditional edge using route function (goes to coding, weather, or google_search based on category)
-- coding → END
-- google_search → END
-- weather → END
 
-then we compile the graph with graph.compile().
+step 7 - wire up the graph
 
-step 8 - visualize
-we use Image(graph.get_graph().draw_mermaid_png()) to render a diagram of the graph showing all nodes and edges visually.
+graph = StateGraph(FlowState)
 
-step 9 - invoke and test
-we call graph.invoke({"question":"whats the temperataure in mumbai?"}) and it goes through the full pipeline:
-1. check_question_category classifies it as "weather"
-2. route returns "weather"
-3. weather_node calls weather_agent which uses the get_weather tool
-4. the answer "the current temperature in Mumbai is 23.3C" is returned
+we register all four nodes by name. the name string we give here is what the route function's return value must match exactly — so if route returns "weather" then the node must also be registered with the name "weather".
 
-so the whole system takes a plain user question, automatically classifies it, picks the right specialized agent, and returns the answer. no manual routing needed — the llm decides the path.
+graph.add_edge(START, "check_question_category") — every run starts here, no exceptions.
+graph.add_conditional_edges("check_question_category", route) — after categorizing, call route() to decide next node.
+graph.add_edge("coding", END) — after coding node finishes, we are done.
+graph.add_edge("google_search", END) — same.
+graph.add_edge("weather", END) — same.
+
+graph = graph.compile() — this locks the graph structure and makes it executable. after compile it becomes a runnable object.
+
+
+step 8 - visualize the graph
+Image(graph.get_graph().draw_mermaid_png()) draws the whole graph as a flowchart. you can see the START node connecting to check_question_category, then three branches splitting out to coding, weather, and google_search, each connecting to END. this is very useful to visually confirm the graph is wired correctly before running it.
+
+
+step 9 - run it
+graph.invoke({"question": "whats the temperature in mumbai?"})
+
+this kicks off the full pipeline:
+- check_question_category reads the question and the llm classifies it as "weather"
+- route reads state.category which is now "weather" and returns "weather"
+- langgraph calls weather_node
+- weather_node calls weather_agent which uses the get_weather tool with city="Mumbai"
+- the tool returns "the current temperature in Mumbai is 23.3C"
+- the agent puts together a response and it gets stored in state.answer
+- graph.invoke returns the final FlowState with the answer filled in
+- we print state["answer"] and we are done
+
+the whole system handles routing automatically — you can ask a coding question, a weather question, or anything else and the llm decides the correct path without any manual if-else logic from us.
