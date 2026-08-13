@@ -51,7 +51,21 @@ FlowState — this is the shared state object that gets passed through every nod
   - category: one of "google_search", "weather", or "coding". this starts as a default but gets updated by the first node after the llm classifies the question. using Literal here means pydantic will only accept these exact three strings, nothing else — so the routing logic can never break from an unexpected value.
   - answer: starts empty, gets filled in by whichever agent node handles the question. this is what we print at the end.
 
+example — when the user asks "whats the temperature in mumbai?" the state looks like this at each stage:
+
+  at start:       FlowState(question="whats the temperature in mumbai?", category="google_search", answer="")
+  after category: FlowState(question="whats the temperature in mumbai?", category="weather", answer="")
+  after agent:    FlowState(question="whats the temperature in mumbai?", category="weather", answer="the current temperature in Mumbai is 23.3C")
+
+the state just gets filled in progressively as it passes through each node.
+
 QuestionCategory — this is a tiny helper model with just the category field. we use this only when asking the llm to classify the question. the reason we have a separate model for this is llm.with_structured_output() needs a pydantic model to know exactly what shape of response to force the llm to return. we do not want the full FlowState here — just the category decision. so we give the llm the smallest possible model and it returns a clean {"category": "weather"} style response with no extra text.
+
+example — without structured output the llm might respond like:
+  "based on your question about temperature i think the category is weather"
+but with with_structured_output(QuestionCategory) it is forced to return only:
+  QuestionCategory(category="weather")
+clean and parseable, no extra text to deal with.
 
 
 step 3 - initialize the llm
@@ -70,9 +84,16 @@ instead of calling a real weather api, we define a fake tool using the @tool dec
 
 @tool
 def get_weather(city: str):
+    """it provides real time weather details for any city"""
     return f"the current temperature in {city} is 23.3C"
 
 the @tool decorator is important — it tells langchain to treat this function as a callable tool that an agent can decide to use. the docstring "it provides real time weather details for any city" is not just a comment — langchain reads the docstring to understand what the tool does and when to use it. in production you would replace the return value with an actual weather api call but the pattern stays exactly the same.
+
+example — in production you would swap the return line with something like:
+  import requests
+  res = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid=YOUR_KEY")
+  return f"the current temperature in {city} is {res.json()['main']['temp']}C"
+but the rest of the code — the @tool decorator, the agent creation, the node — all stays exactly the same. the tool is just a plug-in.
 
 then we pass get_weather into create_agent() and the weather_agent is ready. the agent will receive the user question, decide to call get_weather with the city name it extracts, and return the temperature.
 
