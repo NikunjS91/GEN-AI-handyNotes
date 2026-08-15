@@ -2,3 +2,105 @@ today we will build a qna chat bot using langgraph
 based on the user question a complete graph will be followed, from user question to generating answer,
 question and response of it, in the form of memeory we are going to store it, for generating a relative answers.
 
+---
+
+# Code (LangGraph_QNA_bot.ipynb)
+
+## Step 1: Load Environment Variables
+
+```python
+from dotenv import load_dotenv
+load_dotenv()
+```
+
+## Step 2: Imports
+
+```python
+from langchain_groq import ChatGroq
+from pydantic import BaseModel
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
+from langgraph.checkpoint.memory import InMemorySaver
+from typing import Annotated
+```
+
+## Step 3: Define Chat State
+
+```python
+class ChatState(BaseModel):
+    messages: Annotated[list, add_messages]
+```
+
+- `ChatState` holds the conversation history as a list of messages.
+- `Annotated[list, add_messages]` tells LangGraph to append new messages rather than overwrite — this is how memory accumulates across turns.
+
+## Step 4: Initialize the LLM
+
+```python
+llm = ChatGroq(model="openai/gpt-oss-20b")
+```
+
+## Step 5: Define the Chatbot Node
+
+```python
+def chatBotNode(state: ChatState) -> ChatState:
+    res = llm.invoke(state.messages)
+    state.messages = [res]
+    return state
+```
+
+- Takes the current state (full message history), sends it to the LLM, and returns the response as the new message.
+- Because `add_messages` appends, the full history is preserved in the state across invocations.
+
+## Step 6: Set Up Memory (Checkpointer)
+
+```python
+memory = InMemorySaver()
+```
+
+- `InMemorySaver` persists the graph state (including all messages) between `graph.invoke()` calls, keyed by `thread_id`.
+- This is what gives the chatbot memory — each conversation thread remembers prior turns.
+
+## Step 7: Build and Compile the Graph
+
+```python
+graph = StateGraph(ChatState)
+graph.add_node("ChatBot", chatBotNode)
+
+graph.add_edge(START, "ChatBot")
+graph.add_edge("ChatBot", END)
+
+graph = graph.compile(checkpointer=memory)
+```
+
+Graph structure:
+```
+__start__
+    |
+ ChatBot
+    |
+ __end__
+```
+
+- `compile(checkpointer=memory)` wires the `InMemorySaver` into the graph so state is saved/restored on every invoke.
+
+## Step 8: Visualize the Graph
+
+```python
+from IPython.display import Image
+Image(graph.get_graph().draw_mermaid_png())
+```
+
+## Step 9: Run the Chatbot
+
+```python
+config = {"configurable": {"thread_id": "my-bot-1"}}
+res = graph.invoke({"messages": [{"role": "user", "content": "what is my name?"}]}, config)
+print(res["messages"][-1].content)
+# Output: Your name is Nikunj.
+```
+
+- `thread_id` is the key that ties memory to a specific conversation session.
+- Passing the same `thread_id` across multiple `graph.invoke()` calls maintains context — the chatbot remembers previous messages in that thread.
+- `res["messages"][-1].content` gets the last (most recent) LLM response.
+
