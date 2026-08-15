@@ -112,13 +112,30 @@ with_structured_output forces the llm to respond in the shape of QuestionCategor
 route function:
 this is not a node — it is a routing function used with add_conditional_edges(). it receives state and simply returns state.category as a string. langgraph looks at that returned string and finds the matching node name to call next. so returning "weather" sends execution to the weather node, returning "coding" sends it to the coding node, and so on. it is the traffic controller of the graph.
 
+example of how routing works for three different questions:
+  "whats the temperature in delhi?"   → category = "weather"   → weather_node runs
+  "write a python function to sort a list?" → category = "coding"    → coding_node runs
+  "who won the ipl 2024?"             → category = "google_search" → google_search_node runs
+
 coding_node:
 for coding questions we do not need an agent with tools — the llm already knows how to write code. so we just call llm.invoke() directly with a prompt that tells it to respond as a coding expert with a definition, actual code, and a usage example. the result goes into state.answer.
+
+example — if user asks "what is a python decorator?" the coding_node invokes the llm with:
+  "you are a coding expert: what is a python decorator?, generate only coding based responses, response must be as definition, code and coding example."
+and the llm returns a full explanation with a code block, all stored in state.answer.
 
 weather_node:
 we invoke weather_agent with the question wrapped in the messages format that langchain agents expect:
   res = weather_agent.invoke({"messages": [{"role": "user", "content": state.question}]})
 after the agent runs, res["messages"] contains the full conversation history of the agent — the user message, tool call, tool response, and final answer. we pick res["messages"][-2].content which is the second to last message. the reason we skip the last message is that the last entry in messages is usually the raw tool output (like the temperature string). the second to last is the agent's final human-readable response after processing the tool result.
+
+example of what res["messages"] looks like internally after the agent finishes:
+  messages[0] → HumanMessage:  "whats the temperature in mumbai?"
+  messages[1] → AIMessage:     <agent decides to call get_weather tool>
+  messages[2] → ToolMessage:   "the current temperature in Mumbai is 23.3C"   ← this is [-1], raw tool output
+  messages[3] → AIMessage:     "The current temperature in Mumbai is 23.3 degrees Celsius." ← this is [-2], agent's readable response
+
+so we use [-2] to get the nice final answer, not the raw tool string.
 
 google_search_node:
 exact same pattern as weather_node but uses google_agent. invoke with messages, extract answer from messages[-2].content.
@@ -137,6 +154,23 @@ graph.add_edge("google_search", END) — same.
 graph.add_edge("weather", END) — same.
 
 graph = graph.compile() — this locks the graph structure and makes it executable. after compile it becomes a runnable object.
+
+example of the full graph flow visually:
+
+  START
+    ↓
+  check_question_category   ← classifies the question
+    ↓ (route decides)
+  ┌───────────────────────────────────┐
+  │           │              │        │
+  weather   coding     google_search  │
+  agent      llm           agent      │
+  │           │              │        │
+  └───────────┴──────────────┘        │
+                ↓                     │
+               END ───────────────────┘
+
+this is exactly what draw_mermaid_png() shows you when you visualize the compiled graph.
 
 
 step 8 - visualize the graph
