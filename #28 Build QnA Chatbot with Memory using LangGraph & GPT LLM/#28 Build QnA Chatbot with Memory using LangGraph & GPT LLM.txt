@@ -104,3 +104,78 @@ print(res["messages"][-1].content)
 - Passing the same `thread_id` across multiple `graph.invoke()` calls maintains context — the chatbot remembers previous messages in that thread.
 - `res["messages"][-1].content` gets the last (most recent) LLM response.
 
+---
+
+# Examples
+
+## Example 1: Multi-turn conversation (memory in action)
+
+Same `thread_id` across multiple invocations — the bot remembers earlier messages.
+
+```python
+config = {"configurable": {"thread_id": "my-bot-1"}}
+
+# Turn 1
+res = graph.invoke({"messages": [{"role": "user", "content": "My name is Nikunj"}]}, config)
+print(res["messages"][-1].content)
+# Output: Nice to meet you, Nikunj! How can I help you today?
+
+# Turn 2 — bot still knows the name from Turn 1
+res = graph.invoke({"messages": [{"role": "user", "content": "What is my name?"}]}, config)
+print(res["messages"][-1].content)
+# Output: Your name is Nikunj.
+
+# Turn 3 — context keeps building
+res = graph.invoke({"messages": [{"role": "user", "content": "Can you summarize what we talked about?"}]}, config)
+print(res["messages"][-1].content)
+# Output: You told me your name is Nikunj, and then asked me to recall it.
+```
+
+After Turn 3, `res["messages"]` contains all 6 messages (3 human + 3 AI) accumulated in order.
+
+## Example 2: What the messages list looks like
+
+```python
+for msg in res["messages"]:
+    print(type(msg).__name__, ":", msg.content)
+
+# HumanMessage : My name is Nikunj
+# AIMessage    : Nice to meet you, Nikunj! How can I help you today?
+# HumanMessage : What is my name?
+# AIMessage    : Your name is Nikunj.
+# HumanMessage : Can you summarize what we talked about?
+# AIMessage    : You told me your name is Nikunj, and then asked me to recall it.
+```
+
+This is why the LLM always gets the full history — `llm.invoke(state.messages)` sends every message so far.
+
+## Example 3: Separate threads = separate memory
+
+Different `thread_id` means a completely fresh conversation with no shared context.
+
+```python
+config_1 = {"configurable": {"thread_id": "session-A"}}
+config_2 = {"configurable": {"thread_id": "session-B"}}
+
+# Session A
+graph.invoke({"messages": [{"role": "user", "content": "My name is Nikunj"}]}, config_1)
+
+# Session B — no memory of Session A
+res = graph.invoke({"messages": [{"role": "user", "content": "What is my name?"}]}, config_2)
+print(res["messages"][-1].content)
+# Output: I don't know your name yet — you haven't told me!
+```
+
+Use this pattern to support multiple users or isolated chat sessions in the same app.
+
+## Example 4: Inspecting state between turns
+
+```python
+# Check what the checkpointer has stored after a few turns
+state = graph.get_state(config)
+for msg in state.values["messages"]:
+    print(f"{type(msg).__name__}: {msg.content}")
+```
+
+Useful for debugging — lets you see exactly what the LLM will receive on the next invoke.
+
