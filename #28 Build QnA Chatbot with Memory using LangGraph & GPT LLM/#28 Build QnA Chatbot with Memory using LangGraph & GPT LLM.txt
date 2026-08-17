@@ -4,16 +4,14 @@ question and response of it, in the form of memeory we are going to store it, fo
 
 ---
 
-# Code (LangGraph_QNA_bot.ipynb)
-
-## Step 1: Load Environment Variables
+first load the env variables
 
 ```python
 from dotenv import load_dotenv
 load_dotenv()
 ```
 
-## Step 2: Imports
+then import everything we need
 
 ```python
 from langchain_groq import ChatGroq
@@ -24,23 +22,20 @@ from langgraph.checkpoint.memory import InMemorySaver
 from typing import Annotated
 ```
 
-## Step 3: Define Chat State
+define the chat state, messages is a list and add_messages means it will keep appending new messages instead of replacing, this is how memory builds up
 
 ```python
 class ChatState(BaseModel):
     messages: Annotated[list, add_messages]
 ```
 
-- `ChatState` holds the conversation history as a list of messages.
-- `Annotated[list, add_messages]` tells LangGraph to append new messages rather than overwrite — this is how memory accumulates across turns.
-
-## Step 4: Initialize the LLM
+initialize the llm
 
 ```python
 llm = ChatGroq(model="openai/gpt-oss-20b")
 ```
 
-## Step 5: Define the Chatbot Node
+the chatbot node takes the current state which has the full message history, sends it to the llm and returns the response
 
 ```python
 def chatBotNode(state: ChatState) -> ChatState:
@@ -49,19 +44,13 @@ def chatBotNode(state: ChatState) -> ChatState:
     return state
 ```
 
-- Takes the current state (full message history), sends it to the LLM, and returns the response as the new message.
-- Because `add_messages` appends, the full history is preserved in the state across invocations.
-
-## Step 6: Set Up Memory (Checkpointer)
+InMemorySaver is the checkpointer, it saves the graph state between invoke calls so the bot remembers previous messages
 
 ```python
 memory = InMemorySaver()
 ```
 
-- `InMemorySaver` persists the graph state (including all messages) between `graph.invoke()` calls, keyed by `thread_id`.
-- This is what gives the chatbot memory — each conversation thread remembers prior turns.
-
-## Step 7: Build and Compile the Graph
+build the graph, add the node, connect start to chatbot to end, compile with the memory checkpointer
 
 ```python
 graph = StateGraph(ChatState)
@@ -73,25 +62,14 @@ graph.add_edge("ChatBot", END)
 graph = graph.compile(checkpointer=memory)
 ```
 
-Graph structure:
-```
-__start__
-    |
- ChatBot
-    |
- __end__
-```
-
-- `compile(checkpointer=memory)` wires the `InMemorySaver` into the graph so state is saved/restored on every invoke.
-
-## Step 8: Visualize the Graph
+visualize the graph
 
 ```python
 from IPython.display import Image
 Image(graph.get_graph().draw_mermaid_png())
 ```
 
-## Step 9: Run the Chatbot
+run the chatbot, thread_id ties the memory to a specific conversation session, same thread_id = bot remembers previous messages
 
 ```python
 config = {"configurable": {"thread_id": "my-bot-1"}}
@@ -100,82 +78,66 @@ print(res["messages"][-1].content)
 # Output: Your name is Nikunj.
 ```
 
-- `thread_id` is the key that ties memory to a specific conversation session.
-- Passing the same `thread_id` across multiple `graph.invoke()` calls maintains context — the chatbot remembers previous messages in that thread.
-- `res["messages"][-1].content` gets the last (most recent) LLM response.
+res["messages"][-1].content gives us the last llm response
 
 ---
 
-# Examples
+examples
 
-## Example 1: Multi-turn conversation (memory in action)
-
-Same `thread_id` across multiple invocations — the bot remembers earlier messages.
+multi turn conversation, using the same thread_id so the bot remembers everything from previous turns
 
 ```python
 config = {"configurable": {"thread_id": "my-bot-1"}}
 
-# Turn 1
-res = graph.invoke({"messages": [{"role": "user", "content": "My name is Nikunj"}]}, config)
+res = graph.invoke({"messages": [{"role": "user", "content": "my name is nikunj"}]}, config)
 print(res["messages"][-1].content)
-# Output: Nice to meet you, Nikunj! How can I help you today?
+# nice to meet you nikunj! how can i help you?
 
-# Turn 2 — bot still knows the name from Turn 1
-res = graph.invoke({"messages": [{"role": "user", "content": "What is my name?"}]}, config)
+res = graph.invoke({"messages": [{"role": "user", "content": "what is my name?"}]}, config)
 print(res["messages"][-1].content)
-# Output: Your name is Nikunj.
+# your name is nikunj.
 
-# Turn 3 — context keeps building
-res = graph.invoke({"messages": [{"role": "user", "content": "Can you summarize what we talked about?"}]}, config)
+res = graph.invoke({"messages": [{"role": "user", "content": "summarize what we talked about"}]}, config)
 print(res["messages"][-1].content)
-# Output: You told me your name is Nikunj, and then asked me to recall it.
+# you told me your name is nikunj and then asked me to recall it.
 ```
 
-After Turn 3, `res["messages"]` contains all 6 messages (3 human + 3 AI) accumulated in order.
+after 3 turns res["messages"] has 6 messages total, 3 human and 3 ai, all accumulated in order
 
-## Example 2: What the messages list looks like
+what the messages list looks like inside
 
 ```python
 for msg in res["messages"]:
     print(type(msg).__name__, ":", msg.content)
 
-# HumanMessage : My name is Nikunj
-# AIMessage    : Nice to meet you, Nikunj! How can I help you today?
-# HumanMessage : What is my name?
-# AIMessage    : Your name is Nikunj.
-# HumanMessage : Can you summarize what we talked about?
-# AIMessage    : You told me your name is Nikunj, and then asked me to recall it.
+# HumanMessage : my name is nikunj
+# AIMessage    : nice to meet you nikunj!
+# HumanMessage : what is my name?
+# AIMessage    : your name is nikunj.
+# HumanMessage : summarize what we talked about
+# AIMessage    : you told me your name is nikunj...
 ```
 
-This is why the LLM always gets the full history — `llm.invoke(state.messages)` sends every message so far.
+this is why llm.invoke(state.messages) always sends the full history, not just the latest message
 
-## Example 3: Separate threads = separate memory
-
-Different `thread_id` means a completely fresh conversation with no shared context.
+different thread_id = completely separate memory, useful when supporting multiple users
 
 ```python
-config_1 = {"configurable": {"thread_id": "session-A"}}
-config_2 = {"configurable": {"thread_id": "session-B"}}
+config_1 = {"configurable": {"thread_id": "session-a"}}
+config_2 = {"configurable": {"thread_id": "session-b"}}
 
-# Session A
-graph.invoke({"messages": [{"role": "user", "content": "My name is Nikunj"}]}, config_1)
+graph.invoke({"messages": [{"role": "user", "content": "my name is nikunj"}]}, config_1)
 
-# Session B — no memory of Session A
-res = graph.invoke({"messages": [{"role": "user", "content": "What is my name?"}]}, config_2)
+res = graph.invoke({"messages": [{"role": "user", "content": "what is my name?"}]}, config_2)
 print(res["messages"][-1].content)
-# Output: I don't know your name yet — you haven't told me!
+# i don't know your name, you haven't told me!
 ```
 
-Use this pattern to support multiple users or isolated chat sessions in the same app.
-
-## Example 4: Inspecting state between turns
+to inspect what the checkpointer has stored between turns
 
 ```python
-# Check what the checkpointer has stored after a few turns
 state = graph.get_state(config)
 for msg in state.values["messages"]:
     print(f"{type(msg).__name__}: {msg.content}")
 ```
-
-Useful for debugging — lets you see exactly what the LLM will receive on the next invoke.
 
