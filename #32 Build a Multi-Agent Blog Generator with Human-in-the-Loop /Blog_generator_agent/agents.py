@@ -21,10 +21,10 @@ RESEARCH_PROMPT =ChatPromptTemplate.from_messages([
         "Be concise. Use bullet points. Do NOT write the full blog yet."
 
         """},
-    {"role":"user","content": "Topic:{topic},Audiance :{audiance},{revision_hints},Write the reaseach outline now. "}
+    {"role":"user","content": "Topic:{topic},Audience :{audience},{revision_hints},Write the research outline now. "}
 ])
 
-def research_agent(llm:ChatGroq,topic:str,audiance:str,feedback:str="") -> str:
+def research_agent(llm:ChatGroq,topic:str,audience:str,feedback:str="") -> str:
     revision_hints=f"human provided this feedback on your previous research - please address it:{feedback}"
     if not feedback:
         revision_hints = "thi is your first attempt."
@@ -33,7 +33,7 @@ def research_agent(llm:ChatGroq,topic:str,audiance:str,feedback:str="") -> str:
 
     result = chain.invoke({
         "topic": topic,
-        "audiance":audiance,
+        "audience":audience,
         "revision_hints":revision_hints,
     })
 
@@ -53,15 +53,15 @@ WRITER_PROMPT =ChatPromptTemplate.from_messages([
         "- Do NOT add a 'word count' line at the end"
         """},
     {"role":"user","content": """
-    
+
     Topic:{topic},
-    Audiance :{audiance},
+    Audience :{audience},
     Research Notes: {research},
     {revision_hints},
      Write the full blog post now. """}
 ])
 
-def writer_agent(llm:ChatGroq,topic:str,audiance:str,research :str="",feedback:str="") -> str:
+def writer_agent(llm:ChatGroq,topic:str,audience:str,research :str="",feedback:str="") -> str:
     revision_hints=f"human provided this feedback on your previous draft and asked for these changes :{feedback},please apply these changes during writing the blog."
     if not feedback:
         revision_hints = "this is your first attempt."
@@ -72,7 +72,7 @@ def writer_agent(llm:ChatGroq,topic:str,audiance:str,research :str="",feedback:s
 
     result = chain.invoke({
         "topic": topic,
-        "audiance":audiance,
+        "audience":audience,
         "research":research,
         "revision_hints":revision_hints,
     })
